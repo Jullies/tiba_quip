@@ -1,0 +1,14 @@
+Options -Indexes
+DirectoryIndex index.php
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule ^shop/?$ shop-grid.php [L,QSA]
+RewriteRule ^product/([^/]+)/?$ shop-single.php?slug=$1 [L,QSA]
+RewriteRule ^category/([^/]+)/?$ shop-grid.php?category=$1 [L,QSA]
+RewriteRule ^blog/?$ blog.php [L,QSA]
+RewriteRule ^blog/([^/]+)/?$ blog-single.php?slug=$1 [L,QSA]
+RewriteRule ^cart/?$ shop-cart.php [L,QSA]
+RewriteRule ^checkout/?$ shop-checkout.php [L,QSA]
+RewriteRule ^account/?$ user-dashboard.php [L,QSA]
+RewriteRule ^sitemap\.xml$ sitemap.php [L]
+</IfModule>

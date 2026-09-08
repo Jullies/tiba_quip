@@ -1,0 +1,4 @@
+Local admin URL: http://localhost/tiba_quip/admin/login.php
+Email: tibaquipafrica@gmail.com
+Password: 61a361a4baae20af65608254
+Change the password after login through the customer account password page.

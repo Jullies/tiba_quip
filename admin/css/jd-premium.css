@@ -1,0 +1,340 @@
+/* Jullies Develops admin polish — scoped away from the dashboard. */
+:root {
+  --jd-blue: #1769e8;
+  --jd-blue-dark: #0c4fb9;
+  --jd-ink: #10233f;
+  --jd-muted: #64748b;
+  --jd-line: #e4ebf5;
+  --jd-surface: #ffffff;
+  --jd-canvas: #f5f8fc;
+  --jd-shadow: 0 14px 34px rgba(27, 63, 110, .08);
+}
+
+/* Shared sidebar brand alignment, including the dashboard navigation. */
+.layout-wrap .section-menu-left > .box-logo {
+  position: fixed;
+}
+
+.layout-wrap .section-menu-left > .box-logo #site-logo-inner {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  left: 50%;
+  line-height: 0;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.layout-wrap .section-menu-left > .box-logo .button-show-hide {
+  margin-left: auto;
+  position: relative;
+  z-index: 1;
+}
+
+body.jd-admin-page {
+  background: var(--jd-canvas);
+  color: var(--jd-ink);
+}
+
+.jd-admin-page .layout-wrap,
+.jd-admin-page .section-content-right,
+.jd-admin-page .main-content {
+  background: var(--jd-canvas);
+}
+
+.jd-admin-page .section-menu-left::before,
+.jd-admin-page .section-menu-left > .box-logo {
+  background: #fff;
+}
+
+.jd-admin-page .section-menu-left > .box-logo {
+  border-bottom-color: #e8eef7;
+  box-shadow: 12px 0 30px rgba(38, 65, 105, .035);
+}
+
+.jd-admin-page .section-menu-left .section-menu-left-wrap {
+  padding: 18px 12px 28px;
+}
+
+.jd-admin-page .center-heading {
+  color: #9aabc1;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  margin: 12px 12px 9px;
+  text-transform: uppercase;
+}
+
+.jd-admin-page .menu-list .menu-item > a,
+.jd-admin-page .menu-list .menu-item > .menu-item-button {
+  border: 1px solid transparent;
+  border-radius: 12px;
+  color: #263750;
+  font-weight: 700;
+  margin: 3px 0;
+  min-height: 48px;
+  padding: 12px 13px;
+  transition: background .2s ease, border-color .2s ease, color .2s ease, transform .2s ease;
+}
+
+.jd-admin-page .menu-list .menu-item > a:hover,
+.jd-admin-page .menu-list .menu-item > .menu-item-button:hover {
+  background: #f0f6ff;
+  border-color: #dceafe;
+  color: var(--jd-blue);
+  transform: translateX(2px);
+}
+
+.jd-admin-page .menu-list .menu-item > a.active,
+.jd-admin-page .menu-list .menu-item.active > .menu-item-button {
+  background: linear-gradient(135deg, #e9f2ff, #dceaff);
+  border-color: #d6e6ff;
+  color: #1261db;
+}
+
+.jd-admin-page .menu-list .menu-item .icon {
+  color: inherit;
+}
+
+.jd-admin-page .sub-menu {
+  border-left: 1px solid #dce7f5;
+  margin: 5px 0 7px 25px;
+  padding: 3px 0 3px 12px;
+}
+
+.jd-admin-page .sub-menu .sub-menu-item a {
+  border-radius: 9px;
+  color: #62738a;
+  font-weight: 600;
+  margin: 2px 0;
+  padding: 9px 10px;
+}
+
+.jd-admin-page .sub-menu .sub-menu-item a:hover,
+.jd-admin-page .sub-menu .sub-menu-item a.active {
+  background: #eef5ff;
+  color: var(--jd-blue);
+}
+
+.jd-admin-page .header-dashboard {
+  background: rgba(255, 255, 255, .92);
+  border-bottom: 1px solid var(--jd-line);
+  box-shadow: 0 3px 18px rgba(33, 61, 99, .035);
+}
+
+.jd-admin-page .main-content-inner {
+  padding: 32px 34px 44px;
+}
+
+.jd-admin-page .main-content-wrap > .flex.items-center.flex-wrap.justify-between.gap20.mb-27,
+.jd-admin-page .main-content-wrap > .flex.items-center.justify-between.gap20.mb-27 {
+  align-items: end !important;
+  border-bottom: 1px solid var(--jd-line);
+  margin-bottom: 26px !important;
+  padding-bottom: 22px;
+}
+
+.jd-admin-page h3,
+.jd-admin-page h4,
+.jd-admin-page h5 {
+  color: var(--jd-ink);
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+
+.jd-admin-page .breadcrumbs {
+  background: #fff;
+  border: 1px solid var(--jd-line);
+  border-radius: 999px;
+  padding: 7px 12px;
+}
+
+.jd-admin-page .breadcrumbs .text-tiny {
+  color: var(--jd-muted);
+  font-weight: 600;
+}
+
+.jd-admin-page .wg-box {
+  background: var(--jd-surface);
+  border: 1px solid var(--jd-line);
+  border-radius: 16px;
+  box-shadow: var(--jd-shadow);
+}
+
+.jd-admin-page .wg-box > .flex:first-child,
+.jd-admin-page .wg-box > .flex.items-center.justify-between {
+  border-bottom-color: #eef2f7;
+}
+
+.jd-admin-page .wg-table {
+  border-color: #edf2f7;
+}
+
+.jd-admin-page .wg-table .table-title {
+  background: #f8faff;
+  border: 1px solid #edf2f8;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+.jd-admin-page .wg-table .product-item {
+  border-bottom-color: #edf1f6;
+  padding-bottom: 14px;
+  padding-top: 14px;
+}
+
+.jd-admin-page .wg-table .product-item:last-child {
+  border-bottom: 0;
+}
+
+.jd-admin-page .tf-button,
+.jd-admin-page button.tf-button,
+.jd-admin-page .btn-primary {
+  background: linear-gradient(135deg, var(--jd-blue), #2a79ec);
+  border-color: var(--jd-blue);
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(23, 105, 232, .18);
+  font-weight: 750;
+  transition: box-shadow .2s ease, transform .2s ease, background .2s ease;
+}
+
+.jd-admin-page .tf-button:hover,
+.jd-admin-page button.tf-button:hover,
+.jd-admin-page .btn-primary:hover {
+  background: linear-gradient(135deg, var(--jd-blue-dark), var(--jd-blue));
+  box-shadow: 0 10px 22px rgba(23, 105, 232, .26);
+  transform: translateY(-1px);
+}
+
+.jd-admin-page .tf-button.style-1,
+.jd-admin-page .btn-outline-primary {
+  background: #fff;
+  border-color: #b8d1f7;
+  box-shadow: none;
+  color: #1261d6;
+}
+
+.jd-admin-page input:not([type="checkbox"]):not([type="radio"]),
+.jd-admin-page select,
+.jd-admin-page textarea {
+  background: #fbfdff;
+  border-color: #d7e2ef;
+  border-radius: 10px;
+  box-shadow: none;
+  color: var(--jd-ink);
+}
+
+.jd-admin-page input:not([type="checkbox"]):not([type="radio"]):focus,
+.jd-admin-page select:focus,
+.jd-admin-page textarea:focus {
+  background: #fff;
+  border-color: #78aaf6;
+  box-shadow: 0 0 0 4px rgba(31, 111, 235, .11);
+}
+
+.jd-admin-page .form-search input {
+  background: #f8fbff;
+}
+
+.jd-admin-page .form-search .button-submit button {
+  color: var(--jd-blue);
+}
+
+.jd-admin-page .item.trash,
+.jd-admin-page .item.edit,
+.jd-admin-page .item.view {
+  border-radius: 9px;
+  transition: background .18s ease, color .18s ease;
+}
+
+.jd-admin-page .item.trash:hover { background: #fff0f1; color: #dc3545; }
+.jd-admin-page .item.edit:hover,
+.jd-admin-page .item.view:hover { background: #edf5ff; color: var(--jd-blue); }
+
+.jd-admin-page .block-warning,
+.jd-admin-page .alert {
+  border-radius: 12px;
+}
+
+.jd-admin-page .modal-content {
+  border: 1px solid var(--jd-line);
+  border-radius: 18px;
+  box-shadow: 0 22px 60px rgba(15, 41, 78, .2);
+}
+
+.jd-admin-page .modal-header,
+.jd-admin-page .modal-footer {
+  border-color: #edf1f6;
+}
+
+.jd-admin-page .bottom-page {
+  color: #8291a7;
+  padding: 16px 34px 22px;
+}
+
+.jd-admin-page .badge,
+.jd-admin-page .status,
+.jd-admin-page .block-available {
+  border-radius: 999px;
+}
+
+@media (max-width: 991px) {
+  .jd-admin-page .main-content-inner { padding: 24px 20px 34px; }
+  .jd-admin-page .main-content-wrap > .flex.items-center.flex-wrap.justify-between.gap20.mb-27,
+  .jd-admin-page .main-content-wrap > .flex.items-center.justify-between.gap20.mb-27 { align-items: flex-start !important; }
+}
+
+@media (max-width: 575px) {
+  .jd-admin-page .main-content-inner { padding: 19px 14px 28px; }
+  .jd-admin-page .wg-box { border-radius: 13px; }
+  .jd-admin-page .breadcrumbs { border-radius: 10px; }
+  .jd-admin-page .bottom-page { padding: 14px 16px 20px; }
+}
+
+/* Authentication remains intentionally minimal while matching the admin brand. */
+body.jd-login-premium {
+  background: radial-gradient(circle at top right, #dbeafe 0, transparent 33%), #f5f8fc;
+}
+
+.jd-login-premium .wrap-login-page {
+  background: transparent;
+  margin: 0 auto;
+  max-width: 520px;
+  min-height: 100vh;
+  padding: 46px 22px 24px;
+}
+
+.jd-login-premium .login-brand {
+  align-items: center;
+  display: inline-flex;
+  justify-content: center;
+  margin: 0 auto 6px;
+}
+
+.jd-login-premium .login-brand img {
+  height: 81px;
+  object-fit: contain;
+  width: 81px;
+}
+
+.jd-login-premium .login-brand span {
+  color: var(--jd-ink);
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -.02em;
+}
+
+.jd-login-premium .login-box {
+  background: rgba(255,255,255,.96);
+  border: 1px solid var(--jd-line);
+  border-radius: 20px;
+  box-shadow: 0 20px 50px rgba(31, 63, 110, .12);
+  padding: 32px;
+}
+
+.jd-login-premium .login-box h3 { color: var(--jd-ink); font-weight: 800; }
+.jd-login-premium .login-box input { border-color: #d7e2ef; border-radius: 10px; }
+.jd-login-premium .login-box input:focus { border-color: #78aaf6; box-shadow: 0 0 0 4px rgba(31,111,235,.11); }
+.jd-login-premium .login-box .tf-button { background: linear-gradient(135deg, var(--jd-blue), #2a79ec); border-radius: 10px; box-shadow: 0 8px 18px rgba(23,105,232,.18); }
+.jd-login-premium .text-tiny { color: #8090a6; }

@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /tiba_quip/admin/
+Disallow: /tiba_quip/app/
+Disallow: /tiba_quip/control/
+Disallow: /tiba_quip/storage/
+Disallow: /tiba_quip/tools/
+Disallow: /tiba_quip/database/
+Disallow: /tiba_quip/shop-checkout.php
+Disallow: /tiba_quip/user-
+Sitemap: http://localhost/tiba_quip/sitemap.php
