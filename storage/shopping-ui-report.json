@@ -1,0 +1,19 @@
+{
+  "checks": [
+    "Initial page shows 12 products",
+    "Quantity dialog adds two items without navigation; badge updates",
+    "Cart drawer plus/minus updates quantities and subtotal",
+    "Cart persists after reload and supports removal",
+    "Scrolling loads additional batches without duplicate products",
+    "Grid/list switch works",
+    "Infinite loading preserves price filters, sorting and page size",
+    "Failed scroll request can be retried without duplicate products",
+    "Empty result stops automatic loading",
+    "Mobile navigation and filter drawers open and close",
+    "No horizontal overflow at 390px",
+    "No horizontal overflow at 768px",
+    "No horizontal overflow at 1440px"
+  ],
+  "errors": [],
+  "failed_resources": []
+}

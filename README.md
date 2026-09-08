@@ -50,7 +50,13 @@ Reports: `storage/import-report.json` and `storage/migration-verification.json`.
 
 ## Application and admin
 
+The shared storefront navigation follows the JD Shop reference: compact sticky header, product-category dropdown, mobile navigation and an AJAX cart drawer. Add-to-cart opens a quantity dialog and updates the badge without navigating away. Drawer quantity controls and removal use `cart-api.php` with native stock validation, ownership checks and CSRF protection. Cart and checkout pages refresh their displayed order review after drawer edits.
+
+The shop provides a mobile filter drawer, category/price/search filters, sorting, page-size selection, persistent grid/list layout and automatic product loading on scroll. Loading retains the selected filters, uses deterministic ordering and rejects duplicate cards. Failed requests expose a retry button; ordinary pagination remains available without JavaScript. Background product loads do not create additional analytics page views. `tools/shopping-ui-check.py` covers these interactions at mobile, tablet and desktop widths; results are stored in `storage/shopping-ui-report.json`.
+
 `app/bootstrap.php` centralizes sessions, authentication, CSRF, prepared queries, escaping, HTML sanitization and uploads. `app/commerce.php` manages persistent carts/wishlists and transactional orders. `app/storefront.php` renders the PHP routes through shared views. Layout components remain in `overall/`.
+
+Product cards display live average ratings and review counts, including products loaded on scroll. Customers can submit or update a 1–5 star rating and optional comment on the product page; names are public and email addresses remain private. Reviews are associated with the signed-in account or persistent guest cart cookie. Admin > Product reviews can hide or publish reviews; hidden reviews are excluded from averages and cannot be republished by customer edits. The shop also supports sorting by average rating. `database/002_reviews.sql` is applied by `tools/setup.php`; the optional CLI `tools/import-reviews.php` imports approved source product ratings. `tools/check-reviews.py` verifies submissions, edits, public output, validation and moderation, then removes its test review.
 
 Admin features include product/category/blog/page/banner CRUD, multiple product categories and images, editable attributes/variants, inventory, customer details/status, order management/history, settings, contact messages and audit logs. Lists are paginated. Products are archived so historical order snapshots remain intact. Categories cannot be deleted while referenced by products or child categories.
 

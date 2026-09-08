@@ -6,6 +6,7 @@ if(in_array($currentPage,$accountPages))require_user();
 if($_SERVER['REQUEST_METHOD']==='POST'){
  check_csrf();try{
   $action=$_POST['action']??'';
+  if($action==='review'){$reviewProduct=submit_product_review($_POST);flash('Thank you. Your rating has been saved.');redirect('shop-single.php?slug='.rawurlencode($reviewProduct['slug']).'#product-reviews-content');}
   if($currentPage==='logout.php'){$u=user();if(($u['role']??'')==='admin')audit('logout','auth');$_SESSION=[];session_regenerate_id(true);setcookie('tiba_cart','',['expires'=>time()-3600,'path'=>url(),'httponly'=>true,'samesite'=>'Lax']);redirect('login.php');}
   if($action==='cart_add'){cart_add((int)($_POST['product_id']??0),(int)($_POST['variant_id']??0),(int)($_POST['quantity']??1));flash('Added to your cart.');redirect('shop-cart.php');}
   if($action==='cart_update'){foreach($_POST['quantity']??[] as $id=>$qty){$item=null;foreach(cart_items() as $i)if($i['id']==$id)$item=$i;if(!$item)continue;$qty=filter_var($qty,FILTER_VALIDATE_INT);if($qty===false||$qty<0)throw new RuntimeException('Enter a valid quantity.');if($qty===0){db('DELETE FROM cart_items WHERE id=? AND cart_id=?',[$id,cart_id()]);track('remove_from_cart',(int)$item['product_id']);}else{if(!available($item,$qty))throw new RuntimeException('Requested quantity is unavailable for '.$item['name']);db('UPDATE cart_items SET quantity=? WHERE id=? AND cart_id=?',[$qty,$id,cart_id()]);}}flash('Cart updated.');redirect('shop-cart.php');}
@@ -40,7 +41,7 @@ if($_SERVER['REQUEST_METHOD']==='GET')track('page_view');
 require __DIR__.'/../overall/head.php';require __DIR__.'/../overall/header.php';
 ?>
 <main class="main">
-<?php if($view!=='home'): ?><div class="site-breadcrumb"><div class="site-breadcrumb-bg" style="background-image:url(<?= url('assets/img/breadcrumb/01.jpg') ?>)"></div><div class="container"><div class="site-breadcrumb-wrap"><h1 class="breadcrumb-title"><?= h($pageTitle) ?></h1><ul class="breadcrumb-menu"><li><a href="<?= url() ?>"><i class="far fa-home"></i> Home</a></li><li class="active"><?= h($pageTitle) ?></li></ul></div></div></div><?php endif; ?>
+<?php if($view!=='home'&&$view!=='shop'): ?><div class="site-breadcrumb"><div class="site-breadcrumb-bg" style="background-image:url(<?= url('assets/img/breadcrumb/01.jpg') ?>)"></div><div class="container"><div class="site-breadcrumb-wrap"><h1 class="breadcrumb-title"><?= h($pageTitle) ?></h1><ul class="breadcrumb-menu"><li><a href="<?= url() ?>"><i class="far fa-home"></i> Home</a></li><li class="active"><?= h($pageTitle) ?></li></ul></div></div></div><?php endif; ?>
 <?php if($error): ?><div class="container mt-4"><div class="alert alert-danger" role="alert"><?= h($error) ?></div></div><?php endif; ?>
 <?php require __DIR__.'/views/'.(in_array($view,['home','shop','categories','product'])?'catalog':(in_array($view,['cart','wishlist','checkout','order'])?'shopping':(in_array($view,['auth','account'])?'account':'content'))).'.php'; ?>
 </main>

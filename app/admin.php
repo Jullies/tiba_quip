@@ -15,6 +15,7 @@ $settingFields=['site_name','tagline','email','phone','phone_alt','address','cou
 if($_SERVER['REQUEST_METHOD']==='POST'){
  check_csrf();try{
  $action=$_POST['action']??'';
+ if($action==='moderate_review'){$status=$_POST['status']??'';if(!in_array($status,['published','hidden']))throw new RuntimeException('Invalid review status.');db('UPDATE product_reviews SET status=? WHERE id=?',[$status,$id]);audit('review_'.$status,'reviews',$id);flash('Review updated.');redirect('admin/reviews.php');}
  if($action==='save'){$id=admin_save($resource,$id);flash('Saved successfully.');redirect('admin/manage.php?resource='.urlencode($resource).'&id='.$id.'&edit=1');}
  if($action==='archive'){admin_archive($resource,$id);flash('Record archived or removed.');redirect('admin/manage.php?resource='.urlencode($resource));}
  if($action==='order'){update_order($id);flash('Order updated.');redirect('admin/orders.php?id='.$id);}
@@ -22,9 +23,10 @@ if($_SERVER['REQUEST_METHOD']==='POST'){
  if($action==='settings'){$values=[];foreach($settingFields as $k){$v=trim($_POST[$k]??'');if(in_array($k,['payment_cod','payment_bank_transfer','analytics_enabled']))$v=isset($_POST[$k])?'1':'0';if(in_array($k,['shipping_fee','free_shipping_threshold','tax_rate'])&&(!is_numeric($v)||$v<0||($k==='tax_rate'&&$v>100)))throw new RuntimeException('Invalid '.$k);if($k==='email'&&!filter_var($v,FILTER_VALIDATE_EMAIL))throw new RuntimeException('Enter a valid store email.');if(str_starts_with($k,'social_')&&$v!==''&&!filter_var($v,FILTER_VALIDATE_URL))throw new RuntimeException('Social links must be complete URLs.');if($k==='currency'&&!preg_match('/^[A-Z]{3}$/',$v))throw new RuntimeException('Currency must be a three-letter code.');if($k==='site_url'&&(!filter_var($v,FILTER_VALIDATE_URL)||!preg_match('~^https?://~',$v)))throw new RuntimeException('Enter a valid absolute store URL ending in /.');$values[$k]=$k==='site_url'?rtrim($v,'/').'/':$v;}foreach(['logo','favicon'] as $field){$image=upload($field);if($image)$values[$field]=$image;}$conn->begin_transaction();try{foreach($values as $k=>$v)set_setting($k,$v);audit('updated','settings');$conn->commit();}catch(Throwable $e){$conn->rollback();throw $e;}flash('Settings saved.');redirect('admin/settings.php');}
  }catch(mysqli_sql_exception $e){error_log((string)$e);$error='Unable to save. Check for duplicate slugs/SKUs or invalid field values.';}catch(RuntimeException $e){$error=$e->getMessage();}
 }
-$title=['dashboard'=>'Dashboard','analytics'=>'Traffic & ecommerce analytics','manage'=>admin_fields()[$resource]['label'],'orders'=>'Orders','customers'=>'Customers','settings'=>'Website settings','audit'=>'Admin activity','messages'=>'Contact messages'][$adminSection]??'Administration';
+$title=['reviews'=>'Product reviews','dashboard'=>'Dashboard','analytics'=>'Traffic & ecommerce analytics','manage'=>admin_fields()[$resource]['label'],'orders'=>'Orders','customers'=>'Customers','settings'=>'Website settings','audit'=>'Admin activity','messages'=>'Contact messages'][$adminSection]??'Administration';
 require __DIR__.'/views/admin-head.php';
-if($adminSection==='manage')require __DIR__.'/views/admin-manage.php';
+if($adminSection==='reviews')require __DIR__.'/views/admin-reviews.php';
+elseif($adminSection==='manage')require __DIR__.'/views/admin-manage.php';
 elseif(in_array($adminSection,['dashboard','analytics']))require __DIR__.'/views/admin-analytics.php';
 else require __DIR__.'/views/admin-records.php';
 require __DIR__.'/views/admin-footer.php';

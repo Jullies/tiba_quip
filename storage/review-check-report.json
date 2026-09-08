@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "Guest submits a real 4-star review; average and count update",
+    "Public reviews escape HTML and never reveal email addresses",
+    "Updating a review changes the rating without creating a duplicate",
+    "Shop card reflects the saved rating and review count",
+    "Server rejects out-of-range ratings and missing CSRF tokens",
+    "Admin can hide a review and it disappears from public ratings"
+  ],
+  "passed": 6
+}

@@ -67,3 +67,5 @@ function login_user(string $email,string $password,bool $admin=false):bool {
 }
 require_once __DIR__.'/commerce.php';
 require_once __DIR__.'/analytics.php';
+
+require_once __DIR__.'/reviews.php';

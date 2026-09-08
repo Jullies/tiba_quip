@@ -1,6 +1,6 @@
 <?php
 function track(string $event,?int $resource=null,?string $detail=null):void {
-    if(PHP_SAPI==='cli'||($_SERVER['REQUEST_METHOD']??'GET')==='HEAD'||(user()['role']??'')==='admin'||setting('analytics_enabled','1')!=='1'||($_SERVER['HTTP_DNT']??'')==='1')return;
+    if(($_SERVER['HTTP_X_TIBA_LOAD']??'')==='products'||PHP_SAPI==='cli'||($_SERVER['REQUEST_METHOD']??'GET')==='HEAD'||(user()['role']??'')==='admin'||setting('analytics_enabled','1')!=='1'||($_SERVER['HTTP_DNT']??'')==='1')return;
     $ua=$_SERVER['HTTP_USER_AGENT']??'';if(preg_match('/bot|crawl|spider|preview/i',$ua))return;
     $page=basename($_SERVER['SCRIPT_NAME']??'index.php');if(strpos($_SERVER['SCRIPT_NAME']??'','/admin/')!==false)return;
     $visitor=$_COOKIE['tiba_visitor']??'';if(!preg_match('/^[a-f0-9]{64}$/',$visitor)){$visitor=bin2hex(random_bytes(32));setcookie('tiba_visitor',$visitor,['expires'=>time()+86400*180,'path'=>url(),'httponly'=>true,'samesite'=>'Lax','secure'=>!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off']);$_COOKIE['tiba_visitor']=$visitor;}
