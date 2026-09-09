@@ -114,7 +114,7 @@
       const doc=new DOMParser().parseFromString(await response.text(),'text/html'),nextGrid=doc.getElementById('shop-products');if(!nextGrid)throw new Error();
       const items=[...nextGrid.querySelectorAll('[data-product-id]')].filter(el=>!seen.has(el.dataset.productId));
       items.forEach(el=>{seen.add(el.dataset.productId);grid.append(el);});current++;pages=Number(nextGrid.dataset.pages);grid.dataset.page=current;
-      document.getElementById('shop-visible-count').textContent=seen.size;
+      document.getElementById('shop-visible-count').textContent=(Number(grid.dataset.resultStart||1)-1)+seen.size;
       if(!items.length||current>=pages){current=pages;finished();}else{status.textContent='';more.textContent='Load more products';}
     }catch{failed=true;status.textContent='Unable to load more products. Please try again.';more.textContent='Retry loading';more.hidden=false;}
     finally{loading=false;more.disabled=false;}

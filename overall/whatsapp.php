@@ -6,7 +6,7 @@ if (!preg_match('~^https://(?:wa\.me|(?:api|web)\.whatsapp\.com)/~i', $whatsappL
         $whatsappPhone = '254' . substr($whatsappPhone, 1);
     } elseif (preg_match('/^[17]\d{8}$/', $whatsappPhone)) {
         $whatsappPhone = '254' . $whatsappPhone;
-    } elseif (str_starts_with($whatsappPhone, '00')) {
+    } elseif (strpos($whatsappPhone, '00') === 0) {
         $whatsappPhone = substr($whatsappPhone, 2);
     }
     $whatsappLink = preg_match('/^[1-9]\d{7,14}$/', $whatsappPhone)

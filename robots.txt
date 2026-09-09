@@ -1,10 +1,12 @@
 User-agent: *
-Disallow: /tiba_quip/admin/
-Disallow: /tiba_quip/app/
-Disallow: /tiba_quip/control/
-Disallow: /tiba_quip/storage/
-Disallow: /tiba_quip/tools/
-Disallow: /tiba_quip/database/
-Disallow: /tiba_quip/shop-checkout.php
-Disallow: /tiba_quip/user-
-Sitemap: http://localhost/tiba_quip/sitemap.php
+Allow: /
+Disallow: /admin/
+Disallow: /app/
+Disallow: /control/
+Disallow: /database/
+Disallow: /storage/
+Disallow: /uploads/media/
+Disallow: /shop-checkout.php
+Disallow: /user-
+
+Sitemap: https://tibaquipafrica.com/sitemap.php

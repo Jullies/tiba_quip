@@ -1,1 +1,9 @@
-</div></div><div class="bottom-page"><div class="body-text"><?= h(setting('site_name')) ?> administration</div></div></div></div></div></div></div><script src="<?= url('admin/js/jquery.min.js') ?>"></script><script src="<?= url('admin/js/bootstrap.min.js') ?>"></script><script src="<?= url('admin/js/main.js') ?>"></script><script>document.querySelectorAll('[data-confirm]').forEach(f=>f.addEventListener('submit',e=>{if(!confirm(f.dataset.confirm))e.preventDefault()}));</script></body></html>
+</div></div>
+<footer class="bottom-page"><div class="body-text">© <?= date('Y') ?> <?= h(setting('site_name')) ?> · Store administration</div><a href="<?= url() ?>" target="_blank" rel="noopener">View storefront</a></footer>
+</main>
+</div></div></div></div>
+<script src="<?= url('admin/js/jquery.min.js') ?>"></script>
+<script src="<?= url('admin/js/bootstrap.min.js') ?>"></script>
+<script src="<?= url('admin/js/main.js') ?>"></script>
+<script src="<?= url('admin/js/tiba-admin.js') ?>"></script>
+</body></html>

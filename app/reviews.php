@@ -1,4 +1,30 @@
 <?php
+function ensure_site_reviews_table():void {
+    static $ready=false;
+    if($ready)return;
+    try{db('CREATE TABLE IF NOT EXISTS site_reviews (id bigint unsigned AUTO_INCREMENT PRIMARY KEY, user_id bigint unsigned NULL, reviewer_key char(64) NOT NULL UNIQUE, author_name varchar(190) NOT NULL, email varchar(190) NULL, rating tinyint unsigned NOT NULL, body text NOT NULL, status enum("pending","published","hidden") NOT NULL DEFAULT "pending", created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP, updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, INDEX status_created (status,created_at), FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE SET NULL, CHECK(rating BETWEEN 1 AND 5)) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');}catch(mysqli_sql_exception $e){throw new RuntimeException('Client reviews need database CREATE permission for the current database user.');}
+    $ready=true;
+}
+function site_review_summary():array {
+    ensure_site_reviews_table();
+    $summary=row('SELECT COALESCE(AVG(rating),0) average,COUNT(*) count FROM site_reviews WHERE status="published"');
+    return ['average'=>(float)($summary['average']??0),'count'=>(int)($summary['count']??0)];
+}
+function site_review_identity():string{return review_identity();}
+function submit_site_review(array $data):void {
+    ensure_site_reviews_table();
+    $rating=filter_var($data['rating']??null,FILTER_VALIDATE_INT);
+    $name=trim((string)($data['name']??''));$email=trim((string)($data['email']??''));$body=trim((string)($data['review']??''));
+    if($rating===false||$rating<1||$rating>5)throw new RuntimeException('Choose a rating from 1 to 5 stars.');
+    if($name===''||mb_strlen($name)>190)throw new RuntimeException('Enter your name (up to 190 characters).');
+    if($email!==''&&(!filter_var($email,FILTER_VALIDATE_EMAIL)||mb_strlen($email)>190))throw new RuntimeException('Enter a valid email address or leave it empty.');
+    if($body===''||mb_strlen($body)>2000)throw new RuntimeException('Write a review of up to 2,000 characters.');
+    if(!empty($data['website']))throw new RuntimeException('Unable to submit this review.');
+    $identity=site_review_identity();$rate=hash('sha256','site-review:'.$identity);
+    if((int)scalar('SELECT COUNT(*) FROM login_attempts WHERE identity_hash=? AND created_at>DATE_SUB(NOW(),INTERVAL 15 MINUTE)',[$rate])>=5)throw new RuntimeException('You have submitted several reviews recently. Please try again later.');
+    db('INSERT INTO login_attempts(identity_hash) VALUES (?)',[$rate]);
+    db('INSERT INTO site_reviews(user_id,reviewer_key,author_name,email,rating,body,status) VALUES (?,?,?,?,?,?,"pending") ON DUPLICATE KEY UPDATE author_name=VALUES(author_name),email=VALUES(email),rating=VALUES(rating),body=VALUES(body),status="pending"',[user()['id']??null,$identity,$name,$email?:null,$rating,$body]);
+}
 function prime_product_reviews(array $ids):void {
     $ids=array_values(array_unique(array_filter(array_map('intval',$ids))));
     $missing=array_filter($ids,fn($id)=>!isset($GLOBALS['productReviewSummaries'][$id]));

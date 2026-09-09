@@ -1,4 +1,8 @@
 <?php
+if (version_compare(PHP_VERSION, '7.4.0', '<')) {
+    http_response_code(500);
+    exit('Tiba Quip requires PHP 7.4 or newer. Select PHP 8.1 or newer for this domain in DirectAdmin.');
+}
 require_once __DIR__ . '/../control/core/database/connect.php';
 date_default_timezone_set('Africa/Nairobi');
 if (PHP_SAPI !== 'cli') {
@@ -6,7 +10,7 @@ if (PHP_SAPI !== 'cli') {
     ini_set('display_errors','0'); ini_set('log_errors','1');
     ini_set('session.use_strict_mode','1');
     session_name('tiba_session');
-    session_set_cookie_params(['lifetime'=>0,'path'=>$config['base_path'].'/','secure'=>!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS']!=='off','httponly'=>true,'samesite'=>'Lax']);
+    session_set_cookie_params(['lifetime'=>0,'path'=>app_base_path().'/','secure'=>!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS']!=='off','httponly'=>true,'samesite'=>'Lax']);
     if(session_status()===PHP_SESSION_NONE) session_start();
     header('X-Content-Type-Options: nosniff'); header('Referrer-Policy: strict-origin-when-cross-origin'); header('X-Frame-Options: SAMEORIGIN');
     set_exception_handler(function(Throwable $e){ error_log((string)$e); while(ob_get_level()) ob_end_clean(); http_response_code(500); echo 'Unable to complete this request. Please try again.'; });
@@ -16,7 +20,14 @@ function rows(string $sql,array $params=[]): array { return db($sql,$params)->ge
 function row(string $sql,array $params=[]): ?array { return db($sql,$params)->get_result()->fetch_assoc(); }
 function scalar(string $sql,array $params=[]){$r=row($sql,$params);return $r ? reset($r):null;}
 function h($s): string{return htmlspecialchars((string)$s,ENT_QUOTES,'UTF-8');}
-function url(string $path=''):string{global $config;return $config['base_path'].'/'.ltrim($path,'/');}
+function app_base_path():string{
+    static $base=null;
+    if($base!==null)return $base;
+    $script='/'.ltrim(str_replace('\\','/',$_SERVER['SCRIPT_NAME']??'/index.php'),'/');
+    $base=preg_replace('~/(?:admin/|ajax/)?[^/]+$~','',$script)??'';
+    return $base=rtrim($base,'/');
+}
+function url(string $path=''):string{return app_base_path().'/'.ltrim($path,'/');}
 function redirect(string $path):void{header('Location: '.url($path));exit;}
 function setting(string $key,string $default=''):string{static $values=null;if($values===null)$values=array_column(rows('SELECT * FROM settings'),'value','key');return $values[$key]??$default;}
 function set_setting(string $k,string $v):void{db('INSERT INTO settings (`key`,value) VALUES (?,?) ON DUPLICATE KEY UPDATE value=VALUES(value)',[$k,$v]);}
@@ -35,15 +46,21 @@ function safe_link(string $v):string{
     if(preg_match('/^([a-z][a-z0-9+.-]*):/i',$v,$m)&&!in_array(strtolower($m[1]),['http','https','mailto','tel']))return '#';
     return $v;
 }
-function absolute_url(string $path=''):string{return rtrim(setting('site_url','http://localhost'.url()),'/').'/'.ltrim($path,'/');}
+function site_url():string{
+    $secure=(!empty($_SERVER['HTTPS'])&&$_SERVER['HTTPS']!=='off')||((string)($_SERVER['SERVER_PORT']??'')==='443');
+    $host=(string)($_SERVER['HTTP_HOST']??'localhost');
+    if(!preg_match('/^[a-z0-9.-]+(?::[0-9]{1,5})?$/i',$host))$host='localhost';
+    return ($secure?'https':'http').'://'.$host.url();
+}
+function absolute_url(string $path=''):string{return rtrim(site_url(),'/').'/'.ltrim($path,'/');}
 function clean_html(string $html):string {
     if(trim($html)==='')return '';
     $d=new DOMDocument();libxml_use_internal_errors(true);$d->loadHTML('<?xml encoding="utf-8" ?><div>'.$html.'</div>',LIBXML_HTML_NOIMPLIED|LIBXML_HTML_NODEFDTD);libxml_clear_errors();
     $allowed=['div','p','br','strong','b','em','i','u','ul','ol','li','h2','h3','h4','h5','h6','blockquote','a','img','table','thead','tbody','tr','td','th','span','figure','figcaption','hr'];
     $nodes=[];foreach($d->getElementsByTagName('*') as $n)$nodes[]=$n;
-    foreach(array_reverse($nodes) as $n){if(!in_array(strtolower($n->nodeName),$allowed)){if(in_array(strtolower($n->nodeName),['script','style','iframe','object','form','input','button'])){$n->parentNode?->removeChild($n);}else{while($n->firstChild)$n->parentNode->insertBefore($n->firstChild,$n);$n->parentNode?->removeChild($n);}continue;}
+    foreach(array_reverse($nodes) as $n){if(!in_array(strtolower($n->nodeName),$allowed)){if(in_array(strtolower($n->nodeName),['script','style','iframe','object','form','input','button'])){if($n->parentNode)$n->parentNode->removeChild($n);}else{while($n->firstChild)$n->parentNode->insertBefore($n->firstChild,$n);if($n->parentNode)$n->parentNode->removeChild($n);}continue;}
         foreach(iterator_to_array($n->attributes) as $a){if(!in_array($a->name,['href','src','alt','title','colspan','rowspan'])||(($a->name==='href'||$a->name==='src')&&safe_link($a->value)==='#'))$n->removeAttribute($a->name);}
-        if($n->nodeName==='img'&&!$n->getAttribute('src')){$n->parentNode?->removeChild($n);continue;}
+        if($n->nodeName==='img'&&!$n->getAttribute('src')){if($n->parentNode)$n->parentNode->removeChild($n);continue;}
         if($n->nodeName==='img'){$n->setAttribute('loading','lazy');$n->setAttribute('style','max-width:100%;height:auto');}
     }
     return preg_replace('/<\?xml[^>]+>/','',$d->saveHTML());
