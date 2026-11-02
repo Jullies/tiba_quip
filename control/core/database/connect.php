@@ -10,7 +10,7 @@ $dbname = 'tiba_new';
 $config = [
     'environment' => 'local',
     // Used by first-party traffic analytics to resolve visitor IPs through IPAPI.
-    'ipapi_access_key' => getenv('TIBA_IPAPI_ACCESS_KEY') ?: 'd18f6627d9f0e21b000c2cf87533df3a',
+    'ipapi_access_key' => getenv('TIBA_IPAPI_ACCESS_KEY') ?: 'e4d8474bb3568f0af4add6c0ecb443cc',
 ];
 
 $connect_error = "Sorry, we're experiencing connection issues at the moment.";

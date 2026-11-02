@@ -12,7 +12,9 @@ function traffic_ipapi_lookup(string $ip):array {
     global $config;
     $accessKey=trim((string)($config['ipapi_access_key']??''));
     if($ip===''||$accessKey==='')return [];
-    $url='https://api.ipapi.com/'.rawurlencode($ip).'?access_key='.rawurlencode($accessKey);
+    // Match GreatRift's working ipapi integration. This intentionally uses
+    // plaintext HTTP because the configured ipapi plan does not support HTTPS.
+    $url='http://api.ipapi.com/'.rawurlencode($ip).'?access_key='.rawurlencode($accessKey);
     $context=stream_context_create(['http'=>['method'=>'GET','timeout'=>6,'ignore_errors'=>true]]);
     $response=@file_get_contents($url,false,$context);
     $geo=$response?json_decode($response,true):null;

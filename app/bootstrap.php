@@ -32,6 +32,74 @@ function redirect(string $path):void{header('Location: '.url($path));exit;}
 function setting(string $key,string $default=''):string{static $values=null;if($values===null)$values=array_column(rows('SELECT * FROM settings'),'value','key');return $values[$key]??$default;}
 function set_setting(string $k,string $v):void{db('INSERT INTO settings (`key`,value) VALUES (?,?) ON DUPLICATE KEY UPDATE value=VALUES(value)',[$k,$v]);}
 function money($n):string{return setting('currency','KES').' '.number_format((float)$n,2);}
+/**
+ * Finds published products even when the search words contain small spelling errors.
+ * Exact and partial matches are ranked before close spellings, so normal searches keep
+ * their expected order while queries such as "weelchair" still find "wheelchair".
+ */
+function smart_product_search(string $query):array{
+    $query=mb_strtolower(trim($query),'UTF-8');
+    if($query==='')return [];
+    $queryWords=preg_split('/[^\p{L}\p{N}]+/u',$query,-1,PREG_SPLIT_NO_EMPTY);
+    if(!$queryWords)return [];
+    $compactQuery=implode('',$queryWords);
+    $products=rows('SELECT p.id,p.name,p.sku,p.tags,p.short_description,GROUP_CONCAT(DISTINCT c.name SEPARATOR " ") category_names FROM products p LEFT JOIN product_categories pc ON pc.product_id=p.id LEFT JOIN categories c ON c.id=pc.category_id AND c.active=1 WHERE p.status="publish" GROUP BY p.id');
+    $ranked=[];
+    foreach($products as $product){
+        $name=mb_strtolower((string)$product['name'],'UTF-8');
+        $text=mb_strtolower(implode(' ',[$product['name'],$product['sku'],$product['tags'],strip_tags((string)$product['short_description']),$product['category_names']??'']),'UTF-8');
+        if(mb_strpos($name,$query,0,'UTF-8')!==false){$ranked[]=['id'=>(int)$product['id'],'score'=>100];continue;}
+        if(mb_strpos($text,$query,0,'UTF-8')!==false){$ranked[]=['id'=>(int)$product['id'],'score'=>98];continue;}
+        $words=preg_split('/[^\p{L}\p{N}]+/u',$text,-1,PREG_SPLIT_NO_EMPTY);
+        $nameWords=preg_split('/[^\p{L}\p{N}]+/u',$name,-1,PREG_SPLIT_NO_EMPTY);
+        // Treat spaces, hyphens and accidental word breaks as optional. This makes
+        // "wheel chair", "weel chair" and "wheel-chair" comparable to "wheelchair".
+        if(mb_strlen($compactQuery,'UTF-8')>=4){
+            $compactCandidates=$words;$nameCandidates=$nameWords;
+            for($i=0,$wordCount=count($words);$i<$wordCount;$i++){
+                if(isset($words[$i+1]))$compactCandidates[]=$words[$i].$words[$i+1];
+                if(isset($words[$i+2]))$compactCandidates[]=$words[$i].$words[$i+1].$words[$i+2];
+            }
+            for($i=0,$wordCount=count($nameWords);$i<$wordCount;$i++){
+                if(isset($nameWords[$i+1]))$nameCandidates[]=$nameWords[$i].$nameWords[$i+1];
+                if(isset($nameWords[$i+2]))$nameCandidates[]=$nameWords[$i].$nameWords[$i+1].$nameWords[$i+2];
+            }
+            $compactBest=0;$nameCompactBest=0;$queryLength=mb_strlen($compactQuery,'UTF-8');
+            foreach($compactCandidates as $candidate){
+                if($candidate===$compactQuery){$compactBest=100;break;}
+                $candidateLength=mb_strlen($candidate,'UTF-8');$length=max($queryLength,$candidateLength);
+                if($length>50||abs($queryLength-$candidateLength)>max(3,(int)ceil($length*.35)))continue;
+                $distance=levenshtein($compactQuery,$candidate);
+                $compactBest=max($compactBest,(int)round((1-($distance/$length))*100));
+            }
+            foreach($nameCandidates as $candidate){
+                $candidateLength=mb_strlen($candidate,'UTF-8');$length=max($queryLength,$candidateLength);
+                if(!$length||$length>50||abs($queryLength-$candidateLength)>max(3,(int)ceil($length*.35)))continue;
+                $nameCompactBest=max($nameCompactBest,(int)round((1-(levenshtein($compactQuery,$candidate)/$length))*100));
+            }
+            if($compactBest>=70){$ranked[]=['id'=>(int)$product['id'],'score'=>min(97,max($compactBest,$nameCompactBest+3))];continue;}
+        }
+        $scores=[];
+        foreach($queryWords as $needle){
+            $best=0;$needleLength=mb_strlen($needle,'UTF-8');
+            foreach($words as $word){
+                if($word===$needle){$best=100;break;}
+                if($needleLength>=3&&mb_strpos($word,$needle,0,'UTF-8')!==false){$best=max($best,92);continue;}
+                $wordLength=mb_strlen($word,'UTF-8');$length=max($needleLength,$wordLength);
+                if($length<3||$length>50||abs($needleLength-$wordLength)>max(3,(int)ceil($length*.4)))continue;
+                $distance=levenshtein($needle,$word);
+                $best=max($best,(int)round((1-($distance/$length))*100));
+            }
+            $scores[]=$best;
+        }
+        $score=array_sum($scores)/count($scores);
+        $ranked[]=['id'=>(int)$product['id'],'score'=>(int)round($score)];
+    }
+    usort($ranked,static fn(array $a,array $b):int=>$b['score']<=>$a['score']?:$a['id']<=>$b['id']);
+    $strong=array_values(array_filter($ranked,static fn(array $match):bool=>$match['score']>=65));
+    return $strong?:array_slice($ranked,0,12);
+}
+function smart_product_search_ids(string $query):array{return array_column(smart_product_search($query),'id');}
 function csrf():string{if(empty($_SESSION['csrf']))$_SESSION['csrf']=bin2hex(random_bytes(32));return $_SESSION['csrf'];}
 function csrf_field():string{return '<input type="hidden" name="csrf" value="'.h(csrf()).'">';}
 function check_csrf():void{if(!hash_equals(csrf(),(string)($_POST['csrf']??''))){http_response_code(403);exit('Your form expired. Reload the page and try again.');}}
